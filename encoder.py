@@ -19,10 +19,9 @@ MLP(피드포워드)
 """
 
 class MultiheadSelfAttention(nn.Module):
-  def __init__(self, num_heads: int):
-    self.num_heads = num_heads # 헤드 수
-    super().__init__()
-  
+
+  num_heads: int
+
   @nn.compact # flax에서 모델을 사용자 정의할려면 @nn.compact을 붙여야 한다.
   def __call__(self,  inputs_q, inputs_k=None, inputs_v=None, mask=None):
     
@@ -72,16 +71,15 @@ class MultiheadSelfAttention(nn.Module):
     return output
 
 class MlpBlock(nn.Module):
-  def __init__(self, mlp_dim):
-    self.mlp_dim = mlp_dim
-    super().__init__()
+  
+  mlp_dim: int
 
   @nn.compact
   def __call__(self, x):
-    output_dim = x.shape[-1]
-    x = nn.Dence(features=self.mlp_dim)(x)
+    output_dim = x.shape[-1
+    x = nn.Dense(features=self.mlp_dim)(x)
     x = nn.gelu(x)
-    y = nn.Dence(features=output_dim)(x)
+    y = nn.Dense(features=output_dim)(x)
 
     return y
 
@@ -89,10 +87,9 @@ class EncoderBlock(nn.Module):
   """
     해야할 거: LN갈기고, MSA갈기고 skip-connection갈기기
   """
-  def __init__(self, num_heads: int, mlp_dim: int):
-    self.num_heads = num_heads
-    self.mlp_dim = mlp_dim
-    super().__init__()
+
+  num_heads: int
+  mlp_dim: int
 
   @nn.compact
   def __call__(self, inputs):
@@ -106,14 +103,14 @@ class EncoderBlock(nn.Module):
     return z+mlp
 
 class Encoder(nn.Module):
+
   """
   해야할 거: 포지셔널 임베딩 한 거를 L개의 레이어에 넣기
   """
-  def __init__(self, num_layers: int, num_heads: int, mlp_dim: int):
-    self.num_layers = num_layers
-    self.num_heads = num_heads
-    self.mlp_dim = mlp_dim
-    super().__init__()
+
+  num_layers: int
+  num_heads: int
+  mlp_dim: int
 
   @nn.compact
   def __call__(self, x, *, train):
