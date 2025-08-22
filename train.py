@@ -66,7 +66,7 @@ def load_ckpt_if_exists(path, model, optimizer=None, map_location="cpu"):
 
 
 # -----------------------------
-# 학습/검증 루프 (FP32)
+# 학습/검증 루프 
 # -----------------------------
 def train_one_epoch(model, loader, optimizer, device, criterion, grad_clip_norm=None):
     model.train()
@@ -115,10 +115,6 @@ def evaluate(model, loader, device, criterion):
 
     return running_loss/total, correct/total
 
-
-# -----------------------------
-# 메인: 학습 실행 (모델/로더를 외부에서 주입)
-# -----------------------------
 
 # -----------------------------
 # 메인: 학습 실행 (모델/로더를 외부에서 주입)
@@ -195,4 +191,5 @@ def run_train(
     logger.close()
 
     print("학습 종료. 베스트 체크포인트:", best_ckpt)
+
     return best_ckpt, last_ckpt
