@@ -7,6 +7,31 @@ import torch.nn as nn
 import torch.optim as optim
 from tqdm import tqdm
 
+# --- 로거 래퍼 ---
+class Logger:
+    def __init__(self, kind: str = "none", log_dir: str = "runs/vit-exp1"):
+        self.kind = kind
+        self.tb = None
+        if self.kind == "tensorboard":
+            try:
+                from torch.utils.tensorboard import SummaryWriter
+            except Exception as e:
+                raise ImportError(
+                    "TensorBoard 로깅을 사용하려면 'tensorboard' 패키지가 필요합니다. "
+                    "pip install tensorboard 로 설치하세요."
+                ) from e
+            self.tb = SummaryWriter(log_dir=log_dir)
+
+    def add_scalar(self, tag: str, value: float, step: int):
+        if self.kind == "tensorboard" and self.tb is not None:
+            self.tb.add_scalar(tag, value, step)
+
+    def close(self):
+        if self.kind == "tensorboard" and self.tb is not None:
+            self.tb.close()
+
+
+
 
 # -----------------------------
 # 유틸: 시드/체크포인트
@@ -94,6 +119,10 @@ def evaluate(model, loader, device, criterion):
 # -----------------------------
 # 메인: 학습 실행 (모델/로더를 외부에서 주입)
 # -----------------------------
+
+# -----------------------------
+# 메인: 학습 실행 (모델/로더를 외부에서 주입)
+# -----------------------------
 def run_train(
     model: torch.nn.Module,
     train_loader,
@@ -105,7 +134,8 @@ def run_train(
     early_stop_patience: int = 10,
     grad_clip_norm: float | None = None,
     ckpt_dir: str = "./checkpoints",
-    use_tb: bool = False,
+    logging: str = "none",          # <-- 변경: 로깅 방식
+    log_dir: str = "runs/vit-exp1", # <-- TB 로그 경로(필요 시)
     seed: int = 42,
 ):
     set_seed(seed)
@@ -114,23 +144,16 @@ def run_train(
 
     criterion = nn.CrossEntropyLoss()
     optimizer = optim.Adam(model.parameters(), lr=lr, betas=(0.9, 0.999), weight_decay=weight_decay)
-
-    # (옵션) 스케줄러
-    # scheduler = optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=epochs)
     scheduler = None
 
-    # 체크포인트/로그
     os.makedirs(ckpt_dir, exist_ok=True)
     best_ckpt = os.path.join(ckpt_dir, "best.pt")
     last_ckpt = os.path.join(ckpt_dir, "last.pt")
     start_epoch, best_val_loss = load_ckpt_if_exists(last_ckpt, model, optimizer, map_location="cpu")
 
-    writer = None
-    if use_tb:
-        from torch.utils.tensorboard import SummaryWriter
-        writer = SummaryWriter(log_dir="runs/vit-exp1")
+    # --- 로거 초기화 ---
+    logger = Logger(kind=logging, log_dir=log_dir)
 
-    # 에폭 루프
     patience = 0
     for epoch in range(start_epoch, epochs):
         t0 = time.time()
@@ -149,13 +172,13 @@ def run_train(
               f"lr={optimizer.param_groups[0]['lr']:.2e} | "
               f"{time.time()-t0:.1f}s")
 
-        if writer:
-            writer.add_scalar("Loss/train", train_loss, epoch)
-            writer.add_scalar("Loss/val",   val_loss,   epoch)
-            writer.add_scalar("Acc/train",  train_acc,  epoch)
-            writer.add_scalar("Acc/val",    val_acc,    epoch)
+        # --- 로깅 ---
+        logger.add_scalar("Loss/train", train_loss, epoch)
+        logger.add_scalar("Loss/val",   val_loss,   epoch)
+        logger.add_scalar("Acc/train",  train_acc,  epoch)
+        logger.add_scalar("Acc/val",    val_acc,    epoch)
 
-        save_ckpt(last_ckpt, epoch, model, optimizer, best_val_loss)  # 항상 저장
+        save_ckpt(last_ckpt, epoch, model, optimizer, best_val_loss)
 
         if val_loss < best_val_loss - 1e-6:
             best_val_loss = val_loss
@@ -168,8 +191,8 @@ def run_train(
             print(f"Early stopping at epoch {epoch+1} (best val_loss={best_val_loss:.4f})")
             break
 
-    if writer:
-        writer.close()
+    # --- 로거 종료 ---
+    logger.close()
 
     print("학습 종료. 베스트 체크포인트:", best_ckpt)
     return best_ckpt, last_ckpt
