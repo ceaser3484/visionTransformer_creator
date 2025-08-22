@@ -31,6 +31,8 @@ if __name__ == '__main__':
         early_stop_patience=cfg.get("early_stop_patience", 10),
         grad_clip_norm=cfg.get("grad_clip_norm", None),
         ckpt_dir=cfg.get("ckpt_dir", "./checkpoints"),
-        use_tb=cfg.get("use_tb", False),
+        logging=cfg.get("logging", "none"),             # <-- 변경
+        log_dir=cfg.get("log_dir", "runs/vit-exp1"),    # <-- 선택
         seed=cfg.get("seed", 42),
     )
+
