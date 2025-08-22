@@ -1,7 +1,5 @@
 import torch
 import torch.nn as nn
-import math
-
 
 # -------------------------------
 # Multihead Self Attention
@@ -166,3 +164,4 @@ class ViTClassifier(nn.Module):
         cls = self.encoder(tokens, attn_mask)  # (B,D)
         logits = self.head(cls)                # (B,num_classes)
         return logits
+
