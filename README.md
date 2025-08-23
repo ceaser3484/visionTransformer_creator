@@ -7,7 +7,7 @@
 ![Docker](https://img.shields.io/badge/docker-%230db7ed.svg?style=for-the-badge&logo=docker&logoColor=white)
 ![Git](https://img.shields.io/badge/git-%23F05033.svg?style=for-the-badge&logo=git&logoColor=white)
 
-**팀명: 전압기(Transformer)**
+**팀명: 변압기(Transformer)**
 
 </div>
 
@@ -117,8 +117,8 @@ visionTransformer_creator/
 
 <div align="center">
 
-**🔥 함께 학습하고 성장하는 전압기(Transformer) 팀 🔥**
+**🔥 함께 학습하고 성장하는 변압기(Transformer) 팀 🔥**
 
-Developed by 전압기 Team
+Developed by 변압기 Team
 
 </div>
