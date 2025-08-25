@@ -41,9 +41,9 @@ class MultiheadSelfAttention(nn.Module):
     self.d_model = d_model # D차원을 d_model에 저장
     self.head_dim = d_model // self.num_heads # d차원을 헤드의 수로 나누어서 각 헤드의 차원을 구함. 이를 위해 D차원은 num_heads로 나누어 떨어져야 함
 
-    self.query = nn.Linear(d_model, d_model) # 아래의 선형연산을 위한 선형레이어들
-    self.key = nn.Linear(d_model, d_model)
-    self.value = nn.Linear(d_model, d_model)
+    self.query = nn.Linear(d_model, d_model, bias=False) # 아래의 선형연산을 위한 선형레이어들
+    self.key = nn.Linear(d_model, d_model, bias=False)
+    self.value = nn.Linear(d_model, d_model, bias=False)
 
     self.softmax = nn.Softmax(dim=-1)
 
